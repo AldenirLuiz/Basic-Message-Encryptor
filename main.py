@@ -1,32 +1,50 @@
 
 # Lista a tabela ASCII
-def charmap():
+def charmap() -> list:
+    """Cria uma lista contendo todos os caracteres ASCII.
+
+    Returns:
+        list: lista com todos os caracteres ASCII.
+    """
     chars = list()
     for char in range(128):
         chars.append(chr(char))
     return chars
 
 # Cria a tabela de indexacao da string fazendo o deslocamento na tabela ASCII
-def classifier(char_map:str, key=3):
-    # ECNA -> Exception in Classifier with non-alpha character
-    # ECTA -> Exception in Classifier with true alpha character
+def classifier(char_map:str, key=3, encript=True) -> list:
+    """ Gera um dicionário onde as chaves são os índices dos caracteres na string original 
+    e os valores são os índices dos caracteres na tabela ASCII após o 
+    deslocamento (ou inversamente, dependendo da operação).
+
+    Args:
+        char_map (str): string a ser processada
+        key (int, optional): valor de deslocamento. Defaults to 3. valores mais baixos podem causar perda de dados!
+        encript (bool, optional): tipo de operacao: encriptar | reverter. Defaults to True.
+
+    Returns:
+        list: retorna uma lista de enderecos ASCII de caracteres
+    """
+    
     dict_map = dict()
     chars = charmap()
-    
+    # percorrendo e enumerando a sequencia de caracteres
     for i, char in enumerate(char_map):
-        
-        if char.isalnum():
+        if char.isascii() : # filtro de caracteres (removendo caracteres nao ASCII)
             try:
-                dict_map[f'{i}-char'] = chars.index(char) + key
-            except ValueError:
-                # print(f"debug_ECTA: {char}")
-                dict_map[f'{i}-{char}'] = char
-        elif char.isspace():
-            dict_map[f'{i}-{char}'] = char
-            
+                if encript: # caso a configuracao seja encript, executa o deslocamento
+                    dict_map[f'{i}-char'] = chars.index(char) + key
+                    
+                else: # do contrario, executa o deslocamento inverso
+                    dict_map[f'{i}-char'] = chars.index(char) - key
+                    
+            except ValueError: # em caso de erro de valor o caractere sera adicionado intacto.
+                print(f"debug_ECTA: {char}")
+                dict_map[f'{i}-{char}'] = char  
+               
     return list(dict_map.values())
 
-def knife(char_map, size=4):
+def knife(char_map:str, size:int=4) -> list:
     temp_list = list()
     indexer = 0
     counter = 0
@@ -47,25 +65,39 @@ def knife(char_map, size=4):
     
 
 # Trunca a string e faz o deslocamento (caso ativado o deslocamento)
-def truncate(char_map:str, value):
+def truncate(char_map:str, value:int, encript=True):
+    """Processador de string | Truncar e reverter trunc
+
+    Args:
+        char_map (str): string a ser processada.
+        value (int): tamanho do deslocamneto, max: 2 (valores mais altos resultam em perda de dados.)
+        encript (bool, optional): tipo de processo, encriptar ou desencriptar. Defaults to True.
+
+    Returns:
+        str: retorna uma string truncada de acordo com os valores configurados.
+    """
     ascii_map = charmap()
     temp_string = ""
     
-    for char in char_map:
-        if char_map.index(char) >= int(len(char_map)/2):
-            try:
-                if char.isalnum():
+    # fatiar a string passada em duas partes
+    striped: str = knife(char_map, size=2)
+    
+    for char in striped[1]: # a segunda metade da string sera truncada
+        try:
+            if char.isascii():
+                if encript:
                     temp_string += ascii_map[ascii_map.index(char)-value]
                 else:
-                    temp_string += char
-                    
-            except ValueError:
-                # print(f"debug_ETNA: {char}")
+                    temp_string += ascii_map[ascii_map.index(char)+value]
+            else:
                 temp_string += char
-        else:
+                
+        except IndexError:
+            print(f"debug_ETNA: {char}")
             temp_string += char
             
-    return temp_string
+    return striped[0] + temp_string
+    
 
 # Converte uma tabela de indexacao em string
 def umpack(sequence:str, invert=False):
@@ -86,31 +118,36 @@ def umpack(sequence:str, invert=False):
     else:
         return temp_str
 
-_keymap_lenght = 1 # Max: 3
+_keymap_lenght = 3 # Max: 3 "Um valor alto pode causar perda de caracteres"
 _keymap_decode = 1 # 1 ou 0 (0 para desligar o deslocamento truncado)
 
+def encript(message: str):
+    temp_msg = str()
+    # criptografando
+    for seq in knife(message, 4):
+        code0 = classifier(seq, _keymap_lenght, True)
+        code1 = umpack(code0, True)
+        code2 = truncate(code1, _keymap_decode, True)
+        temp_msg += code2
+    return temp_msg
+
+
+def decript(message: str):
+    temp_msg = str()
+    for seq in knife(message, 4):
+        # descriptografando
+        decode2 = truncate(seq, _keymap_decode, False)
+        decode1 = classifier(decode2, _keymap_lenght, False)
+        print(f"debug code1: {decode1}")
+        decode0 = umpack(decode1, True)
+        temp_msg += decode0
+    return temp_msg
 
 
 if __name__ == "__main__":
-    message = """A noite, 4 gatos e 3 cães passeavam na 6ª Avenida. A1 lua estava brilhante, e 5 estrelas no céu iluminavam a rua. Eles caminhavam lentamente, 1 dos gatos se 4talecia 7tre os outros, como se fosse o líder do grupo.
-De repente, ouviram 2 barulhos altos, eram 8 tiros vindo de uma rua lateral. Os animais entraram em pânico e correram em direções diferentes. 1 dos gatos subiu em cima de 9 latas de lixo, enquanto os 3 cães se esconderam 4 trás de um muro.
-A cena era digna de um filme de ação. 6 dos tiros atingiram a parede, fazendo 3 buracos nela. Os animais observavam assustados, e o líder dos gatos, que agora estava em cima de 2 caixas, olhava para os outros com um olhar de preocupação.
-Depois de alguns minutos de suspense, os tiros cessaram. Os animais, ainda tremendo, se reuniram e seguiram em frente. Foi uma noite 5quecível, e eles nunca mais se aventuraram na 6ª Avenida à noite."""
-    cripto_msg = ""
-    decode_msg = ""
-    # criptografando
-    for seq in knife(message):
-        code0 = classifier(seq, _keymap_lenght)
-        code1 = umpack(code0, True)
-        code2 = truncate(code1, _keymap_decode)
-        cripto_msg += code2
-    print(f"Criptografada: {cripto_msg}\n")
+    message_1 = "1Uma mensagem A ser enviada quando 4forçada | Trunca a string e faz o deslocamento (caso ativado o deslocamento)"
+    msg_encript = encript(message_1)
     
-    for seq in knife(cripto_msg):
-        # descriptografando
-        decode2 = truncate(seq, -_keymap_decode)
-        decode1 = classifier(decode2, -_keymap_lenght)
-        decode0 = umpack(decode1, True)
-        decode_msg += decode0
-        
-    print(f"descriptografada: {decode_msg}\n")
+    print(f"Encriptada: {msg_encript}")
+    print(f"Decriptada: {decript(msg_encript)}")
+    

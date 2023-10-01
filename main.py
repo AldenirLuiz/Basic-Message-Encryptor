@@ -45,6 +45,15 @@ def classifier(char_map:str, key=3, encript=True) -> list:
     return list(dict_map.values())
 
 def knife(char_map:str, size:int=4) -> list:
+    """Divide a string em partes de tamanho definido em _size_.
+
+    Args:
+        char_map (str): string a ser processada
+        size (int, optional): quantidade de partes a ser dividida. Defaults to 4.
+
+    Returns:
+        list: retorna uma lista com as partes.
+    """
     temp_list = list()
     indexer = 0
     counter = 0
@@ -101,6 +110,15 @@ def truncate(char_map:str, value:int, encript=True):
 
 # Converte uma tabela de indexacao em string
 def umpack(sequence:str, invert=False):
+    """Converte uma sequência de índices de caracteres na string original.
+
+    Args:
+        sequence (str): string a ser processada.
+        invert (bool, optional): inverter string. Defaults to False.
+
+    Returns:
+        str: retorna uma string processada de acordo com os parametros definidos.
+    """
     temp_str = ""
     for i in sequence:
         if isinstance(i, str):

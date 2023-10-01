@@ -136,17 +136,24 @@ def umpack(sequence:str, invert=False):
     else:
         return temp_str
 
-_keymap_lenght = 3 # Max: 3 "Um valor alto pode causar perda de caracteres"
-_keymap_decode = 1 # 1 ou 0 (0 para desligar o deslocamento truncado)
+_keymap_lenght = 2 # Max: 3 "Um valor alto pode causar perda de caracteres"
+_keymap_decode = 0 # 1 ou 0 (0 para desligar o deslocamento truncado)
 
 def encript(message: str):
     temp_msg = str()
+    
     # criptografando
     for seq in knife(message, 4):
+        # primeiro passo realizar o deslocamento dos caracteres na tabela ascii
         code0 = classifier(seq, _keymap_lenght, True)
+        
+        # segundo passo converter a tabela de enderecos ascii novamente em string retomando invertida(ou nao)
         code1 = umpack(code0, True)
+        
+        # terceiro passo realizar o trunc da string (realiza um deslocamento na segunda metade)
         code2 = truncate(code1, _keymap_decode, True)
-        temp_msg += code2
+        temp_msg += code2 # junta a fatia a string principal
+        
     return temp_msg
 
 
@@ -156,7 +163,6 @@ def decript(message: str):
         # descriptografando
         decode2 = truncate(seq, _keymap_decode, False)
         decode1 = classifier(decode2, _keymap_lenght, False)
-        print(f"debug code1: {decode1}")
         decode0 = umpack(decode1, True)
         temp_msg += decode0
     return temp_msg

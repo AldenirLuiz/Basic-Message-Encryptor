@@ -95,9 +95,15 @@ def truncate(char_map:str, value:int, encript=True):
         try:
             if char.isascii():
                 if encript:
-                    temp_string += ascii_map[ascii_map.index(char)-value]
+                    if char.isalpha():
+                        temp_string += (ascii_map[ascii_map.index(char)+value+2])
+                    else:
+                        temp_string += ascii_map[ascii_map.index(char)-value]
                 else:
-                    temp_string += ascii_map[ascii_map.index(char)+value]
+                    if char.isalpha():
+                        temp_string += ascii_map[ascii_map.index(char)-value-2]
+                    else:
+                        temp_string += ascii_map[ascii_map.index(char)-value]
             else:
                 temp_string += char
                 
@@ -105,7 +111,7 @@ def truncate(char_map:str, value:int, encript=True):
             print(f"debug_ETNA: {char}")
             temp_string += char
             
-    return striped[0] + temp_string
+    return striped[0][::-1] + temp_string
     
 
 # Converte uma tabela de indexacao em string
@@ -169,7 +175,7 @@ def decript(message: str):
 
 
 if __name__ == "__main__":
-    message_1 = "1Uma mensagem A ser enviada quando 4forçada | Trunca a string e faz o deslocamento (caso ativado o deslocamento)"
+    message_1 = "@Lancer007"
     msg_encript = encript(message_1)
     
     print(f"Encriptada: {msg_encript}")
